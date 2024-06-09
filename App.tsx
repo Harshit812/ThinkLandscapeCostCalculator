@@ -1,117 +1,99 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Provider as PaperProvider } from 'react-native-paper';
+import AreaInputScreen from './src/screens/AreaInput/AreaInputScreen';
+import BudgetSelectionScreen from './src/screens/BudgetSelection/BudgetSelectionScreen';
+import FeatureSelectionScreen from './src/screens/FeatureSelection/FeatureSelectionScreen';
+import TenurePlansScreen from './src/screens/TenurePlans/TenurePlansScreen';
+import CustomStepIndicator from './src/components/StepIndicator';
+import { calculateTotalCost, calculatePlanCosts } from './src/utilities/costCalculations';
+import { UserSelectedFeatures, BudgetType } from './src/types';
+import Button from './src/components/Button';
+import SplashScreen from 'react-native-splash-screen';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [areaValue, setAreaValue] = useState('0');
+  const [selectedBudget, setSelectedBudget] = useState<BudgetType>('Economic');
+  const [selectedCurrency, setSelectedCurrency] = useState('AED');
+  const [selectedFeatures, setSelectedFeatures] = useState<UserSelectedFeatures>({
+    tiles: false,
+    pool: false,
+    seating: false,
+    bar: false,
+    pizzaOven: false,
+    grill: false,
+    fridge: false,
+    pergola: false,
+    trees: false,
+    lighting: false,
+    grass: false,
+  });
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const conversionRate = 3.67; // 1 USD = 3.67 AED
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  const toggleFeature = (feature: keyof UserSelectedFeatures) => {
+    setSelectedFeatures((prevFeatures) => ({
+      ...prevFeatures,
+      [feature]: !prevFeatures[feature],
+    }));
+  };
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const totalCost = calculateTotalCost(Number(areaValue), selectedFeatures, selectedBudget);
+  const plans = calculatePlanCosts(totalCost);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return <AreaInputScreen areaValue={areaValue} setAreaValue={setAreaValue} />;
+      case 1:
+        return <BudgetSelectionScreen selectedBudget={selectedBudget} setSelectedBudget={setSelectedBudget} />;
+      case 2:
+        return <FeatureSelectionScreen selectedFeatures={selectedFeatures} toggleFeature={toggleFeature} />;
+      case 3:
+        return <TenurePlansScreen plans={plans} selectedCurrency={selectedCurrency} conversionRate={conversionRate} />;
+      default:
+        return null;
+    }
+  };
+
+  const handleContinue = () => {
+    setCurrentStep((prevStep) => prevStep + 1);
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <PaperProvider>
+      <View style={styles.container}>
+        <CustomStepIndicator currentStep={currentStep} goToStep={setCurrentStep} />
+        <View style={styles.stepContent}>
+          {renderStepContent()}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        <View style={styles.buttonContainer}>
+          {currentStep > 0 && <Button title="Previous" onPress={() => setCurrentStep(currentStep - 1)} />}
+          {currentStep < 3 && <Button title="Continue" onPress={handleContinue} />}
+        </View>
+      </View>
+    </PaperProvider>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  stepContent: {
+    flex: 1,
+    marginVertical: 20,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 
