@@ -10,6 +10,8 @@ Cost Calculation: Get an estimate of the total cost and tenure plans.
 Step Indicator: Visual guide for the steps involved in the calculation process.
 Splash Screen: Initial splash screen with a logo.
 
+##APK LINK: https://drive.google.com/file/d/1izgwQ_l3igKbkpvz97iKlAbtyxjwwlqc/view?usp=sharing
+
 #Installation
 Prerequisites
 Node.js
@@ -35,7 +37,9 @@ npx react-native run-android
 npx react-native run-ios
 
 #Usage
+
 Enter Area: Start by entering the area in square meters.
 Select Budget: Choose a budget type (Economic, Standard, Premium).
 Select Features: Toggle the features you want to include in your landscaping project.
 View Tenure Plans: Review the calculated cost and available tenure plans.
+
