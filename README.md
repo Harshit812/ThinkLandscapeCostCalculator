@@ -19,7 +19,7 @@ Xcode (for iOS)
 
 #Clone the Repository
 
-git clone https://github.com/Harshit812/landscape-cost-calculator.git
+git clone https://github.com/Harshit812/ThinkLandscapeCostCalculator.git
 cd landscape-cost-calculator
 
 #Install Dependencies
